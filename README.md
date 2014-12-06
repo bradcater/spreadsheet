@@ -20,3 +20,5 @@ You can run the cli via `bundle exec ruby run.rb`. It supports:
   * SET *row* *column* *value*
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)
   * QUIT (or EXIT)
+
+You can run the tests via `bundle exec ruby test.rb`.
