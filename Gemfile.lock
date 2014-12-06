@@ -1,0 +1,24 @@
+PATH
+  remote: ~/Applications/ryeppp
+  specs:
+    ryeppp (0.0.7.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    facter (1.7.6)
+    minitest (5.3.5)
+    minitest-color (0.0.1)
+    parallel (0.6.5)
+    trollop (2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  facter (~> 1.7.6)
+  minitest (~> 5.3.3)
+  minitest-color (~> 0.0.1)
+  parallel (~> 0.6.5)
+  ryeppp!
+  trollop (~> 2.0)
