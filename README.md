@@ -2,7 +2,7 @@ spreadsheet
 ===========
 
 This is a toy spreadsheet written in Ruby. It supports some simple functions:
-  * ABS - the absolute value of a cell
+  * ABS - the absolute value of a given cell
   * AVG (MEAN) - the average of a given cell(s)
   * CONCAT - the concatenation of a given cell(s)
   * DIV - the first given cell divided by the second given cell
@@ -10,6 +10,7 @@ This is a toy spreadsheet written in Ruby. It supports some simple functions:
   * MAX - the maximum of a given cell(s)
   * MIN - the minimum of a given cell(s)
   * PROD - the product of a given cell(s)
+  * REF - the value of a given cell
   * SUB - the first given cell minus the second given cell
   * SUM - the sum of a given cell(s)
 
