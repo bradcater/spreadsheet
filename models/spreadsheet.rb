@@ -43,8 +43,18 @@ class Spreadsheet
       unless can_set_formula_cell?(row, col)
         raise "Cannot set FormulaCell for (#{row},#{col})."
       end
-      cell_indices = value.scan(/\(\d+,\d+\)/).map do |pair|
-        pair.gsub(/^\(/, '').gsub(/\)$/, '').split(/,/).map(&:to_i)
+      cell_indices = value.scan(/([A-Z]+\d+|\((\d+,\d+)\))/).map do |pair|
+        # pair will be of the form
+        # ["A0", nil]
+        # or of the form
+        # ["(0,0)", "0,0"]
+        if pair.last.nil?
+          letters = pair.first.match(/^([A-Z]+)/)[0]
+          numbers = pair.first.match(/(\d+)$/)[0]
+          [numbers.to_i, Formatter.column_label_to_index(letters)]
+        else
+          pair.last.split(/,/).map(&:to_i)
+        end
       end
       unless FormulaCell.valid_indices?(row, col, cell_indices)
         raise 'A FormulaCell cannot refer to itself.'
@@ -88,8 +98,8 @@ class Spreadsheet
 
   def to_s
     Formatter.to_grid_s(
-      Formatter.with_axis_labels(
-        Formatter.format_grid(@rows.map do |row|
+      Formatter.format_grid(
+        Formatter.with_axis_labels(@rows.map do |row|
           row.map do |cell|
             cell.try(:get_value) || 'nil'
           end

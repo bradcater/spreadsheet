@@ -26,15 +26,17 @@ while true
   elsif cmd[0] == 'GET'
     puts s.get_cell(cmd[1].to_i, cmd[2].to_i)
   elsif cmd[0] == 'SET'
-    value = if cmd[3] =~ /^[-\d\.]$/
-      cmd[3]
+    if cmd[1] =~ /^[A-Z]+[0-9]+$/
+      value = cmd[2..-1].join(' ')
+      row_idx = cmd[1].match(/([0-9]+$)/)[0].to_i
+      col_idx = Formatter.column_label_to_index(cmd[1].match(/(^[A-Z]+)/)[0])
     else
-      cmd[3..-1].join(' ')
-    end
-    row_idx, col_idx = if cmd[1] =~ /^[A-Z]+$/
-      [cmd[2].to_i, Formatter.column_label_to_index(cmd[1])]
-    else
-      [cmd[1].to_i, cmd[2].to_i]
+      value = cmd[3..-1].join(' ')
+      row_idx, col_idx = if cmd[1] =~ /^[A-Z]+$/
+        [cmd[2].to_i, Formatter.column_label_to_index(cmd[1])]
+      else
+        [cmd[1].to_i, cmd[2].to_i]
+      end
     end
     s.set_cell(row_idx, col_idx, value)
   elsif cmd[0] == 'SHOWCLASSES'
