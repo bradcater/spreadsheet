@@ -87,11 +87,15 @@ class Spreadsheet
   end
 
   def to_s
-    @rows.map do |row|
-      row.map do |cell|
-        cell.nil? ? 'nil' : cell.get_value
-      end.join("\t")
-    end.join("\n")
+    Formatter.to_grid_s(
+      Formatter.with_axis_labels(
+        Formatter.format_grid(@rows.map do |row|
+          row.map do |cell|
+            cell.try(:get_value) || 'nil'
+          end
+        end)
+      )
+    )
   end
 
   def to_class_s

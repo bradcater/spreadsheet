@@ -49,8 +49,16 @@ class TestRubyExtensions < Minitest::Test
     assert_equal(3, [1, 2].sum)
   end
 
+  def test_nil_blank
+    assert_equal(true, nil.blank?)
+  end
+
   def test_nil_present
     assert_equal(false, nil.present?)
+  end
+
+  def test_object_blank
+    assert_equal(false, Object.new.blank?)
   end
 
   def test_object_present
@@ -63,5 +71,27 @@ class TestRubyExtensions < Minitest::Test
 
   def test_object_try
     assert_equal(true, Object.new.try(:present?))
+  end
+
+  def test_blank
+    assert_equal(true, ''.blank?)
+    assert_equal(true, ' '.blank?)
+    assert_equal(false, 'abc'.blank?)
+  end
+
+  def test_first
+    assert_equal('A', 'A'.first)
+    assert_equal('A', 'ABC'.first)
+  end
+
+  def test_last
+    assert_equal('A', 'A'.last)
+    assert_equal('C', 'ABC'.last)
+  end
+
+  def test_string_pad_to_width
+    assert_equal('abc', 'abc'.pad_to_width(3))
+    assert_equal('def ', 'def'.pad_to_width(4))
+    assert_equal('ghi   ', 'ghi'.pad_to_width(6))
   end
 end

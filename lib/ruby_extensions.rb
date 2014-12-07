@@ -30,11 +30,13 @@ class Array
 end
 
 class NilClass
+  def blank? ; true ; end
   def present? ; false ; end
   def try(*a, &b) ; nil ; end
 end
 
 class Object
+  def blank? ; false ; end
   def present? ; true ; end
 
   # Taken from
@@ -45,5 +47,14 @@ class Object
     else
       public_send(*a, &b) if respond_to?(a.first)
     end
+  end
+end
+
+class String
+  def blank? ; strip == '' ; end
+  def first ; self[0] ; end
+  def last ; self[-1] ; end
+  def pad_to_width(w, pad_char=' ')
+    self + (pad_char * (w - self.size))
   end
 end

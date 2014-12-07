@@ -31,7 +31,12 @@ while true
     else
       cmd[3..-1].join(' ')
     end
-    s.set_cell(cmd[1].to_i, cmd[2].to_i, value)
+    row_idx, col_idx = if cmd[1] =~ /^[A-Z]+$/
+      [cmd[2].to_i, Formatter.column_label_to_index(cmd[1])]
+    else
+      [cmd[1].to_i, cmd[2].to_i]
+    end
+    s.set_cell(row_idx, col_idx, value)
   elsif cmd[0] == 'SHOWCLASSES'
     puts s.to_class_s
     puts
