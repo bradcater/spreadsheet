@@ -16,6 +16,8 @@ class FormulaCell < Cell
       DivCell
     elsif o =~ /^=EXP/
       ExpCell
+    elsif o=~ /^=REF/
+      RefCell
     elsif o =~ /^=MAX/
       MaxCell
     elsif o =~ /^=MIN/

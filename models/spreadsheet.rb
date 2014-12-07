@@ -59,8 +59,11 @@ class Spreadsheet
       unless FormulaCell.valid_indices?(row, col, cell_indices)
         raise 'A FormulaCell cannot refer to itself.'
       end
-      if (klass = FormulaCell.formula_type(value)) == AbsCell
-        @rows[row][col] = AbsCell.new(self, cell_indices.first)
+      if [
+        AbsCell,
+        RefCell
+      ].include?(klass = FormulaCell.formula_type(value))
+        @rows[row][col] = klass.new(self, cell_indices.first)
       elsif klass
         @rows[row][col] = klass.new(self, cell_indices)
       else
