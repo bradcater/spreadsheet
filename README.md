@@ -22,4 +22,6 @@ You can run the cli via `bundle exec ruby run.rb`. It supports:
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)
   * QUIT (or EXIT)
 
+You can save the current spreadsheet using `SAVE *filename*`. To load it later, use `LOAD *filename*`.
+
 You can run the tests via `bundle exec ruby test.rb`.

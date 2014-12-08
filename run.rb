@@ -1,5 +1,6 @@
 $:<< '.'
 
+require 'fileutils'
 require 'readline'
 require 'trollop'
 
@@ -16,31 +17,43 @@ s = Spreadsheet.new(
   :rows    => $opts[:rows],
   :columns => $opts[:columns]
 )
+spreadsheet_command_handler = SpreadsheetCommandHandler.new(s)
+playback_logger = PlaybackLogger.new
 
 while true
-  puts s
+  puts spreadsheet_command_handler.spreadsheet
   r = Readline.readline('> ', true)
   cmd = r.strip.split(/\s+/)
+  playback_logger << cmd.join(' ')
   if %w{EXIT QUIT}.include?(cmd[0])
     break
-  elsif cmd[0] == 'GET'
-    puts s.get_cell(cmd[1].to_i, cmd[2].to_i)
-  elsif cmd[0] == 'SET'
-    if cmd[1] =~ /^[A-Z]+[0-9]+$/
-      value = cmd[2..-1].join(' ')
-      row_idx = cmd[1].match(/([0-9]+$)/)[0].to_i
-      col_idx = Formatter.column_label_to_index(cmd[1].match(/(^[A-Z]+)/)[0])
-    else
-      value = cmd[3..-1].join(' ')
-      row_idx, col_idx = if cmd[1] =~ /^[A-Z]+$/
-        [cmd[2].to_i, Formatter.column_label_to_index(cmd[1])]
-      else
-        [cmd[1].to_i, cmd[2].to_i]
-      end
+  elsif spreadsheet_command_handler.handles_command?(cmd)
+    s = spreadsheet_command_handler.handle_command(cmd)
+  elsif cmd[0] == 'LOAD'
+    filename = cmd[1]
+    unless filename =~ /\.spr$/
+      filename = "#{filename}.spr"
     end
-    s.set_cell(row_idx, col_idx, value)
+    s, commands = playback_logger.load(File.join(Dir.pwd, 'saved', filename))
+    spreadsheet_command_handler = SpreadsheetCommandHandler.new(s)
+    commands.each do |cmd|
+      spreadsheet_command_handler.handle_command(cmd.strip.split(/\s+/))
+    end
+  elsif cmd[0] == 'SAVE'
+    filename = cmd[1]
+    unless filename =~ /\.spr$/
+      filename = "#{filename}.spr"
+    end
+    unless Dir.exists?(File.join(Dir.pwd, 'saved'))
+      FileUtils.mkdir(File.join(Dir.pwd, 'saved'))
+    end
+    playback_logger.persist!(
+      spreadsheet_command_handler.spreadsheet.get_row_count,
+      spreadsheet_command_handler.spreadsheet.get_column_count,
+      File.join(Dir.pwd, 'saved', filename)
+    )
   elsif cmd[0] == 'SHOWCLASSES'
-    puts s.to_class_s
+    puts spreadsheet_command_handler.spreadsheet.to_class_s
     puts
   end
 end
