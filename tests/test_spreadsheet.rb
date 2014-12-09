@@ -19,6 +19,18 @@ class TestSpreadsheet < Minitest::Test
     assert_equal(5, @spreadsheet.get_column_count)
   end
 
+  def test_add_row
+    assert_equal(4, @spreadsheet.get_row_count)
+    @spreadsheet.add_row
+    assert_equal(5, @spreadsheet.get_row_count)
+  end
+
+  def test_add_column
+    assert_equal(5, @spreadsheet.get_column_count)
+    @spreadsheet.add_column
+    assert_equal(6, @spreadsheet.get_column_count)
+  end
+
   def test_set_and_get_cell
     @spreadsheet.set_cell(1, 2, 5)
     assert_equal(5, @spreadsheet.get_cell(1, 2))

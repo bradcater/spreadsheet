@@ -17,10 +17,14 @@ This is a toy spreadsheet written in Ruby. It supports some simple functions:
 It handles dependencies between cells and *should* `raise` if you attempt to create a dependency cycle.
 
 You can run the cli via `bundle exec ruby run.rb`. It supports:
+  * ADDROW
+  * ADDCOLUMN
   * GET *row* *column*
   * SET *row* *column* *value*
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)
   * QUIT (or EXIT)
+
+For cell references, the cli also supports Excel-style addressing, such as A0 in place of (0,0).
 
 You can save the current spreadsheet using `SAVE *filename*`. To load it later, use `LOAD *filename*`.
 

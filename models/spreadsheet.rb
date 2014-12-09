@@ -32,6 +32,16 @@ class Spreadsheet
     get_raw_cell(row, col).try(:get_value)
   end
 
+  def add_row
+    @rows << [nil] * get_column_count
+  end
+
+  def add_column
+    @rows.each do |row|
+      row << nil
+    end
+  end
+
   def clear_cell(row, col)
     @rows[row][col] = nil
     @dependencies.delete([row, col])

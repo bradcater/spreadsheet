@@ -10,12 +10,16 @@ class SpreadsheetCommandHandler
   def spreadsheet ; @spreadsheet ; end
 
   def handles_command?(cmd)
-    %w{GET SET}.include?(cmd[0])
+    %w{ADDROW ADDCOLUMN GET SET}.include?(cmd[0])
   end
 
   def handle_command(cmd)
     raise "Invalid command: #{cmd}" unless handles_command?(cmd)
-    if cmd[0] == 'GET'
+    if cmd[0] == 'ADDROW'
+      @spreadsheet.add_row
+    elsif cmd[0] == 'ADDCOLUMN'
+      @spreadsheet.add_column
+    elsif cmd[0] == 'GET'
       puts @spreadsheet.get_cell(cmd[1].to_i, cmd[2].to_i)
     elsif cmd[0] == 'SET'
       if cmd[1] =~ /^[A-Z]+[0-9]+$/
