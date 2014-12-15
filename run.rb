@@ -25,6 +25,7 @@ while true
   r = Readline.readline('> ', true)
   cmd = r.strip.split(/\s+/)
   playback_logger << cmd.join(' ')
+  cmd[0] = cmd[0].upcase
   if %w{EXIT QUIT}.include?(cmd[0])
     break
   elsif spreadsheet_command_handler.handles_command?(cmd)

@@ -1,12 +1,4 @@
-class SubCell < FormulaCell
-  def initialize(spreadsheet, cell_indices)
-    @spreadsheet = spreadsheet
-    @cell_indices = cell_indices
-    if @cell_indices.size != 2
-      raise "Invalid size for SubCell cell_indices: #{@cell_indices.size}"
-    end
-    update!
-  end
+class SubCell < PairDependencyFormulaCell
   def update!
     @value = @cell_indices.map do |cell_index|
       @spreadsheet.get_cell(*cell_index)

@@ -31,6 +31,50 @@ class TestSpreadsheet < Minitest::Test
     assert_equal(6, @spreadsheet.get_column_count)
   end
 
+  def test_remove_column_single_dependency_formula_cell
+    @spreadsheet.set_cell(0, 1, 4)
+    @spreadsheet.set_cell(0, 4, '=REF(B0)')
+    assert_equal(4, @spreadsheet.get_cell(0, 1))
+    assert_equal(4, @spreadsheet.get_cell(0, 4))
+    @spreadsheet.remove_column(2)
+    assert_equal(4, @spreadsheet.get_cell(0, 1))
+    assert_equal(4, @spreadsheet.get_cell(0, 3))
+    @spreadsheet.set_cell(0, 1, 12)
+    assert_equal(12, @spreadsheet.get_cell(0, 3))
+  end
+
+  def test_remove_column_pair_dependency_formula_cell
+    @spreadsheet.set_cell(0, 1, 4)
+    @spreadsheet.set_cell(0, 3, 2)
+    @spreadsheet.set_cell(0, 4, '=DIV(B0,D0)')
+    assert_equal(4, @spreadsheet.get_cell(0, 1))
+    assert_equal(2, @spreadsheet.get_cell(0, 3))
+    assert_equal(2, @spreadsheet.get_cell(0, 4))
+    @spreadsheet.remove_column(2)
+    assert_equal(4, @spreadsheet.get_cell(0, 1))
+    assert_equal(2, @spreadsheet.get_cell(0, 2))
+    assert_equal(2, @spreadsheet.get_cell(0, 3))
+    @spreadsheet.set_cell(0, 1, 12)
+    @spreadsheet.set_cell(0, 2, 4)
+    assert_equal(3, @spreadsheet.get_cell(0, 3))
+  end
+
+  def test_remove_column_multi_dependency_formula_cell
+    @spreadsheet.set_cell(0, 1, 1)
+    @spreadsheet.set_cell(0, 3, 1)
+    @spreadsheet.set_cell(0, 4, '=SUM(B0,D0)')
+    assert_equal(1, @spreadsheet.get_cell(0, 1))
+    assert_equal(1, @spreadsheet.get_cell(0, 3))
+    assert_equal(2, @spreadsheet.get_cell(0, 4))
+    @spreadsheet.remove_column(2)
+    assert_equal(1, @spreadsheet.get_cell(0, 1))
+    assert_equal(1, @spreadsheet.get_cell(0, 2))
+    assert_equal(2, @spreadsheet.get_cell(0, 3))
+    @spreadsheet.set_cell(0, 1, 2)
+    @spreadsheet.set_cell(0, 2, 2)
+    assert_equal(4, @spreadsheet.get_cell(0, 3))
+  end
+
   def test_set_and_get_cell
     @spreadsheet.set_cell(1, 2, 5)
     assert_equal(5, @spreadsheet.get_cell(1, 2))

@@ -19,6 +19,7 @@ It handles dependencies between cells and *should* `raise` if you attempt to cre
 You can run the cli via `bundle exec ruby run.rb`. It supports:
   * ADDROW
   * ADDCOLUMN
+  * REMOVECOLUMN
   * GET *row* *column*
   * SET *row* *column* *value*
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)
