@@ -17,9 +17,10 @@ This is a toy spreadsheet written in Ruby. It supports some simple functions:
 It handles dependencies between cells and *should* `raise` if you attempt to create a dependency cycle.
 
 You can run the cli via `bundle exec ruby run.rb`. It supports:
-  * ADDROW
   * ADDCOLUMN
-  * REMOVECOLUMN
+  * ADDROW
+  * REMOVECOLUMN *column*
+  * REMOVEROW *row*
   * GET *row* *column*
   * SET *row* *column* *value*
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)

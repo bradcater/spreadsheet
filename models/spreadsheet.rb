@@ -115,9 +115,7 @@ class Spreadsheet
     return true if @rows.all?{|row| row[col].nil?}
     false
   end
-  # FIXME Implement the logic for remove_row before (possibly) returning true.
   def can_remove_row?(row)
-    return false
     return false if row < 0
     return false if row > get_row_count - 1
     return true if @rows[row].all?(&:nil?)
@@ -128,7 +126,7 @@ class Spreadsheet
       raise "Cannot remove column #{col}."
     end
     @rows.map! do |row|
-      row[0..col-1] + row[col+1..-1]
+      col == 0 ? row[col+1..-1] : (row[0..col-1] + row[col+1..-1])
     end
     (col..get_column_count-1).each do |col_idx|
       (0..get_row_count-1).each do |row_idx|
@@ -152,16 +150,14 @@ class Spreadsheet
     end
     @dependencies = @dependencies.inject({}) do |hsh, (depender, dependees)|
       if depender.last >= col
-        #hsh[(depender = [depender.first, depender.last - 1])] = dependees
         depender = [depender.first, depender.last - 1]
       end
       new_dependees = Set.new
       dependees.to_a.each do |dependee|
-        new_dependees << if dependee.last >= col
-          [dependee.first, dependee.last - 1]
-        else
-          [dependee.first, dependee.last]
-        end
+        new_dependees << [
+          dependee.first,
+          dependee.last >= col ? dependee.last - 1 : dependee.last
+        ]
       end
       hsh[depender] = new_dependees
       hsh
@@ -171,7 +167,41 @@ class Spreadsheet
     unless can_remove_row?(row)
       raise "Cannot remove row #{row}."
     end
-    @rows = @rows[0..row-1] + @rows[row+1..-1]
+    @rows = row == 0 ? @rows[row+1..-1] : (@rows[0..row-1] + @rows[row+1..-1])
+    (row..get_row_count-1).each do |row_idx|
+      (0..get_column_count-1).each do |col_idx|
+        if (cell = get_raw_cell(row_idx, col_idx)).is_a?(FormulaCell)
+          if cell.is_a?(SingleDependencyFormulaCell)
+            cell.cell_index = [
+              cell.cell_index.first >= row ? cell.cell_index.first - 1 : cell.cell_index.first,
+              cell.cell_index.last
+            ]
+          elsif cell.is_a?(PairDependencyFormulaCell) ||
+            cell.is_a?(MultiDependencyFormulaCell)
+            cell.cell_indices.map! do |cell_index|
+              [cell_index.first >= row ? cell_index.first - 1 : cell_index.first,
+               cell_index.last]
+            end
+          else
+            raise "Unknown cell type: #{cell}"
+          end
+        end
+      end
+    end
+    @dependencies = @dependencies.inject({}) do |hsh, (depender, dependees)|
+      if depender.first >= row
+        depender = [depender.first - 1, depender.last]
+      end
+      new_dependees = Set.new
+      dependees.to_a.each do |dependee|
+        new_dependees << [
+          dependee.first >= row ? dependee.first - 1 : dependee.first,
+          dependee.last
+        ]
+      end
+      hsh[depender] = new_dependees
+      hsh
+    end
   end
 
   def to_s

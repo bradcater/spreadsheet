@@ -31,6 +31,22 @@ class TestSpreadsheet < Minitest::Test
     assert_equal(6, @spreadsheet.get_column_count)
   end
 
+  def test_can_remove_column
+    assert_equal(false, @spreadsheet.can_remove_column?(-1))
+    assert_equal(false, @spreadsheet.can_remove_column?(6))
+    assert_equal(true, @spreadsheet.can_remove_column?(0))
+    @spreadsheet.set_cell(0, 0, 1)
+    assert_equal(false, @spreadsheet.can_remove_column?(0))
+  end
+
+  def test_can_remove_row
+    assert_equal(false, @spreadsheet.can_remove_row?(-1))
+    assert_equal(false, @spreadsheet.can_remove_row?(5))
+    assert_equal(true, @spreadsheet.can_remove_row?(0))
+    @spreadsheet.set_cell(0, 0, 1)
+    assert_equal(false, @spreadsheet.can_remove_row?(0))
+  end
+
   def test_remove_column_single_dependency_formula_cell
     @spreadsheet.set_cell(0, 1, 4)
     @spreadsheet.set_cell(0, 4, '=REF(B0)')
@@ -73,6 +89,50 @@ class TestSpreadsheet < Minitest::Test
     @spreadsheet.set_cell(0, 1, 2)
     @spreadsheet.set_cell(0, 2, 2)
     assert_equal(4, @spreadsheet.get_cell(0, 3))
+  end
+
+  def test_remove_row_single_dependency_formula_cell
+    @spreadsheet.set_cell(0, 0, 4)
+    @spreadsheet.set_cell(2, 0, '=REF(A0)')
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(4, @spreadsheet.get_cell(2, 0))
+    @spreadsheet.remove_row(1)
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(4, @spreadsheet.get_cell(1, 0))
+    @spreadsheet.set_cell(0, 0, 12)
+    assert_equal(12, @spreadsheet.get_cell(1, 0))
+  end
+
+  def test_remove_row_pair_dependency_formula_cell
+    @spreadsheet.set_cell(0, 0, 4)
+    @spreadsheet.set_cell(2, 0, 2)
+    @spreadsheet.set_cell(3, 0, '=DIV(A0,A2)')
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(2, @spreadsheet.get_cell(2, 0))
+    assert_equal(2, @spreadsheet.get_cell(3, 0))
+    @spreadsheet.remove_row(1)
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(2, @spreadsheet.get_cell(1, 0))
+    assert_equal(2, @spreadsheet.get_cell(2, 0))
+    @spreadsheet.set_cell(0, 0, 12)
+    @spreadsheet.set_cell(1, 0, 4)
+    assert_equal(3, @spreadsheet.get_cell(2, 0))
+  end
+
+  def test_remove_row_multi_dependency_formula_cell
+    @spreadsheet.set_cell(0, 0, 4)
+    @spreadsheet.set_cell(2, 0, 2)
+    @spreadsheet.set_cell(3, 0, '=SUM(A0,A2)')
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(2, @spreadsheet.get_cell(2, 0))
+    assert_equal(6, @spreadsheet.get_cell(3, 0))
+    @spreadsheet.remove_row(1)
+    assert_equal(4, @spreadsheet.get_cell(0, 0))
+    assert_equal(2, @spreadsheet.get_cell(1, 0))
+    assert_equal(6, @spreadsheet.get_cell(2, 0))
+    @spreadsheet.set_cell(0, 0, 12)
+    @spreadsheet.set_cell(1, 0, 4)
+    assert_equal(16, @spreadsheet.get_cell(2, 0))
   end
 
   def test_set_and_get_cell
