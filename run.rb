@@ -24,8 +24,8 @@ while true
   puts spreadsheet_command_handler.spreadsheet
   r = Readline.readline('> ', true)
   cmd = r.strip.split(/\s+/)
-  playback_logger << cmd.join(' ')
   cmd[0] = cmd[0].upcase
+  playback_logger << cmd.join(' ')
   if %w{EXIT QUIT}.include?(cmd[0])
     break
   elsif spreadsheet_command_handler.handles_command?(cmd)
@@ -38,6 +38,7 @@ while true
     s, commands = playback_logger.load(File.join(Dir.pwd, 'saved', filename))
     spreadsheet_command_handler = SpreadsheetCommandHandler.new(s)
     commands.each do |cmd|
+      next if cmd.strip.split(/\s+/).first.downcase == 'save'
       spreadsheet_command_handler.handle_command(cmd.strip.split(/\s+/))
     end
   elsif cmd[0] == 'SAVE'
