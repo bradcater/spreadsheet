@@ -27,7 +27,7 @@ You can run the cli via `bundle exec ruby run.rb`. It supports:
   * SHOWCLASSES (in case you want to see what class each *value* has been mapped to)
   * QUIT (or EXIT)
 
-For cell references, the cli also supports Excel-style addressing, such as A0 in place of (0,0).
+For cell references, the cli also supports Excel-style addressing, such as A0 in place of (0,0), and for ranges, A0:C0 in place of (0,0), (0,1), (0,2).
 
 You can save the current spreadsheet using `SAVE *filename*`. To load it later, use `LOAD *filename*`.
 

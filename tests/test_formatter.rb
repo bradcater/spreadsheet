@@ -59,4 +59,11 @@ class TestFormatter < Minitest::Test
       %w{foo bar bat}
     ]))
   end
+
+  def test_direct_ref_to_coords
+    assert_equal([0, 0], Formatter.direct_ref_to_coords('A0'))
+    assert_equal([1, 0], Formatter.direct_ref_to_coords('A1'))
+    assert_equal([0, 1], Formatter.direct_ref_to_coords('B0'))
+    assert_equal([1, 1], Formatter.direct_ref_to_coords('B1'))
+  end
 end

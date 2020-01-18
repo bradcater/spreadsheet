@@ -61,4 +61,10 @@ class Formatter
     end
     rows
   end
+
+  def self.direct_ref_to_coords(r)
+    letters = r.match(/^([A-Z]+)/)[0]
+    numbers = r.match(/(\d+)$/)[0]
+    [numbers.to_i, self.column_label_to_index(letters)]
+  end
 end
