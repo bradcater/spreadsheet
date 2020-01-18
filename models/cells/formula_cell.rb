@@ -16,14 +16,16 @@ class FormulaCell < Cell
       DivCell
     elsif o =~ /^=EXP/
       ExpCell
-    elsif o=~ /^=REF/
-      RefCell
     elsif o =~ /^=MAX/
       MaxCell
+    elsif o =~ /^=MEDIAN/
+      MedianCell
     elsif o =~ /^=MIN/
       MinCell
     elsif o =~ /^=PROD/
       ProdCell
+    elsif o=~ /^=REF/
+      RefCell
     elsif o =~ /^=SUB/
       SubCell
     elsif o =~ /^=SUM/

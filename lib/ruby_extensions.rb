@@ -10,6 +10,12 @@ class Array
   def mean
     empty? ? nil : sum / size.to_f
   end
+  def median
+    return nil if empty?
+    tmp = self.sort
+    mid = (tmp.size / 2).to_i
+    tmp[mid]
+  end
   alias_method :average, :mean
   def product
     if empty?

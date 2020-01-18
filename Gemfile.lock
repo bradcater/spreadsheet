@@ -1,5 +1,5 @@
 PATH
-  remote: ~/Applications/ryeppp
+  remote: ../ryeppp
   specs:
     ryeppp (0.0.7.0)
 
@@ -22,3 +22,6 @@ DEPENDENCIES
   parallel (~> 0.6.5)
   ryeppp!
   trollop (~> 2.0)
+
+BUNDLED WITH
+   1.16.2

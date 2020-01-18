@@ -8,6 +8,7 @@ This is a toy spreadsheet written in Ruby. It supports some simple functions:
   * DIV - the first given cell divided by the second given cell
   * EXP - the first given cell to the power of the second given cell
   * MAX - the maximum of a given cell(s)
+  * MEDIAN - the median of a given cell(s)
   * MIN - the minimum of a given cell(s)
   * PROD - the product of a given cell(s)
   * REF - the value of a given cell
