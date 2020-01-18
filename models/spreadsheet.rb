@@ -53,17 +53,45 @@ class Spreadsheet
       unless can_set_formula_cell?(row, col)
         raise "Cannot set FormulaCell for (#{row},#{col})."
       end
-      cell_indices = value.scan(/([A-Z]+\d+|\((\d+,\d+)\))/).map do |pair|
-        # pair will be of the form
-        # ["A0", nil]
-        # or of the form
-        # ["(0,0)", "0,0"]
-        if pair.last.nil?
-          letters = pair.first.match(/^([A-Z]+)/)[0]
-          numbers = pair.first.match(/(\d+)$/)[0]
-          [numbers.to_i, Formatter.column_label_to_index(letters)]
+      cell_indices = if value =~ /([A-Z]+\d+\:[A-Z]+\d+)/
+        from, to = value.split(/:/)
+        from = from.gsub(/^.+?\(/, '')
+        to = to.gsub(/\)$/, '')
+        from_row = from.gsub(/[A-Z]+/, '')
+        from_col = from.gsub(/\d+/, '')
+        to_row = to.gsub(/[A-Z]+/, '')
+        to_col = to.gsub(/\d+/, '')
+        unless from_row == to_row || from_col == to_col
+          raise "Only single row and single column dependencies are supported."
+        end
+        tmp = if from_row == to_row
+          if to_row.to_i < from_row.to_i
+            from_row, to_row = [to_row, from_row]
+          end
+          (from_col..to_col).map do |col|
+            "#{col}#{from_row}"
+          end
         else
-          pair.last.split(/,/).map(&:to_i)
+          (from_row.to_i..to_row.to_i).map do |row|
+            "#{from_col}#{row}"
+          end
+        end
+        tmp.map do |r|
+          Formatter.direct_ref_to_coords(r)
+        end
+      else
+        value.scan(/([A-Z]+\d+|\((\d+,\d+)\))/).map do |pair|
+          # pair will be of the form
+          # ["A0", nil]
+          # or of the form
+          # ["(0,0)", "0,0"]
+          if pair.last.nil?
+            letters = pair.first.match(/^([A-Z]+)/)[0]
+            numbers = pair.first.match(/(\d+)$/)[0]
+            [numbers.to_i, Formatter.column_label_to_index(letters)]
+          else
+            pair.last.split(/,/).map(&:to_i)
+          end
         end
       end
       unless FormulaCell.valid_indices?(row, col, cell_indices)
