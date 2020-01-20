@@ -1,3 +1,6 @@
+require 'simplecov'
+SimpleCov.start
+
 $:<< '.'
 
 load 'lib/initializers.rb'
