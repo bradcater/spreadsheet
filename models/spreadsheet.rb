@@ -18,8 +18,8 @@ class Spreadsheet
     (opts[:rows] || DEFAULT_ROWS).times do
       @rows << [nil] * (opts[:columns] || DEFAULT_COLUMNS)
     end
-    # @dependencies is a map of (i,j) -> [(k,l),...] that depend on (i,j)
-    @dependencies = {}
+    # dgraph is the dependency graph of cells.
+    @dgraph = Graph.new
   end
 
   def get_row_count ; @rows.size ; end
@@ -44,15 +44,13 @@ class Spreadsheet
 
   def clear_cell(row, col)
     @rows[row][col] = nil
-    @dependencies.delete([row, col])
+    node = @dgraph.nodes.find{|n| n.name == [row, col]}
+    @dgraph.remove_node(node) if node
   end
 
   def set_cell(row, col, value)
     value = value.strip if value.is_a?(String)
     if FormulaCell.formula?(value)
-      unless can_set_formula_cell?(row, col)
-        raise "Cannot set FormulaCell for (#{row},#{col})."
-      end
       cell_indices = if value =~ /([A-Z]+\d+\:[A-Z]+\d+)/
         from, to = value.split(/:/)
         from = from.gsub(/^.+?\(/, '')
@@ -94,8 +92,53 @@ class Spreadsheet
           end
         end
       end
-      unless FormulaCell.valid_indices?(row, col, cell_indices)
-        raise 'A FormulaCell cannot refer to itself.'
+      puts "@dgraph before modification"
+      @dgraph.nodes.each do |n|
+        puts n
+        n.edges.each do |e|
+          puts "#{e.from_node} -> #{e.to_node}"
+        end
+      end
+      node = @dgraph.nodes.find{|n| n.name == [row, col]}
+      node_existed = !!node
+      node ||= Node.new([row, col])
+      @dgraph.add_node(node) unless node_existed
+      # Only populate added_edges if node already existed in the graph. There's
+      # no reason to populate it if rollback would entail removing the whole new
+      # node that we added.
+      added_edges = []
+      cell_indices.each do |cell_index|
+        tmp_node = @dgraph.nodes.find{|n| n.name == cell_index}
+        tmp_node_existed = !!tmp_node
+        tmp_node ||= Node.new(cell_index)
+        @dgraph.add_node(tmp_node) unless tmp_node_existed
+        e = Edge.new(node, tmp_node)
+        node.add_edge(e)
+        # If the node exists, then add an edge that can be removed if there's a
+        # cycle.
+        # Otherwise, create and add a node that can be removed if there's a
+        # cycle.
+        if node_existed
+          added_edges << e
+        end
+      end
+      if @dgraph.cyclic?
+        raise "This introduces a cycle, so it can't be done."
+        # If we add error handling code, then run this to rollback.
+        #if node_existed
+        #  added_edges.each do |e|
+        #    node.remove_edge(e)
+        #  end
+        #else
+        #  @dgraph.remove_node(node)
+        #end
+      end
+      puts "@dgraph after modification"
+      @dgraph.nodes.each do |n|
+        puts n
+        n.edges.each do |e|
+          puts "#{e.from_node} -> #{e.to_node}"
+        end
       end
       if [
         AbsCell,
@@ -107,33 +150,29 @@ class Spreadsheet
       else
         raise 'NYI'
       end
-      cell_indices.each do |cell_index|
-        @dependencies[cell_index] ||= Set.new
-        @dependencies[cell_index] << [row, col]
-      end
-    elsif StaticCell.number?(value)
-      @rows[row][col] = NumberCell.new(value)
     else
-      @rows[row][col] = StringCell.new(value)
+      unless @dgraph.nodes.any?{|n| n.name == [row, col]}
+        puts "adding #{[row, col]}"
+        @dgraph.add_node(Node.new([row, col]))
+      end
+      if StaticCell.number?(value)
+        @rows[row][col] = NumberCell.new(value)
+      else
+        @rows[row][col] = StringCell.new(value)
+      end
     end
     update_dependencies!(row, col)
   end
 
-  def can_set_formula_cell?(row, col, visited=Set.new)
-    visited << [row, col]
-    (@dependencies[[row, col]] || []).each do |cell_index|
-      return false if visited.include?(cell_index)
-      visited << cell_index
-      return false unless can_set_formula_cell?(*[cell_index, visited].flatten)
-    end
-    true
-  end
-
   def update_dependencies!(row, col)
     get_raw_cell(row, col).update!
-    (@dependencies[[row, col]] || []).each do |cell_index|
-      update_dependencies!(*cell_index)
-      get_raw_cell(*cell_index).update!
+    @dgraph.nodes.each do |node|
+      node.edges.each do |edge|
+        if edge.to_node.name == [row, col]
+          update_dependencies!(*edge.from_node.name)
+          get_raw_cell(row, col).update!
+        end
+      end
     end
   end
 
@@ -176,19 +215,15 @@ class Spreadsheet
         end
       end
     end
-    @dependencies = @dependencies.inject({}) do |hsh, (depender, dependees)|
-      if depender.last >= col
-        depender = [depender.first, depender.last - 1]
+    @dgraph.nodes.each do |node|
+      if node.name[1] == col
+        @dgraph.remove_node(node)
       end
-      new_dependees = Set.new
-      dependees.to_a.each do |dependee|
-        new_dependees << [
-          dependee.first,
-          dependee.last >= col ? dependee.last - 1 : dependee.last
-        ]
+    end
+    @dgraph.nodes.each do |node|
+      if node.name[1] > col
+        node.rename!([node.name[0], node.name[1] - 1])
       end
-      hsh[depender] = new_dependees
-      hsh
     end
   end
   def remove_row(row)
@@ -216,19 +251,15 @@ class Spreadsheet
         end
       end
     end
-    @dependencies = @dependencies.inject({}) do |hsh, (depender, dependees)|
-      if depender.first >= row
-        depender = [depender.first - 1, depender.last]
+    @dgraph.nodes.each do |node|
+      if node.name[0] == row
+        @dgraph.remove_node(node)
       end
-      new_dependees = Set.new
-      dependees.to_a.each do |dependee|
-        new_dependees << [
-          dependee.first >= row ? dependee.first - 1 : dependee.first,
-          dependee.last
-        ]
+    end
+    @dgraph.nodes.each do |node|
+      if node.name[0] > row
+        node.rename!([node.name[0] - 1, node.name[1]])
       end
-      hsh[depender] = new_dependees
-      hsh
     end
   end
 

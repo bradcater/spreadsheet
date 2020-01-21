@@ -207,6 +207,6 @@ class TestSpreadsheet < Minitest::Test
     exception = assert_raises(RuntimeError) do
       @spreadsheet.set_cell(0, 3, '=SUM((0,2),(0,3))')
     end
-    assert_equal('A FormulaCell cannot refer to itself.', exception.message)
+    assert_equal("This introduces a cycle, so it can't be done.", exception.message)
   end
 end
