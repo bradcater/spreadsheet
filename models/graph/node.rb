@@ -4,6 +4,9 @@ class Node
     @name = name
     @edges = []
   end
+  def rename!(n)
+    @name = n
+  end
   def add_edge(e)
     unless e.from_node == self
       raise 'Cannot add an edge that does not start from here.'
@@ -11,5 +14,5 @@ class Node
     @edges << e
   end
   def remove_edge(e) ; @edges -= [e] ; end
-  def to_s ; name ; end
+  def to_s ; name.to_s ; end
 end

@@ -28,6 +28,17 @@ class TestGraph < Minitest::Test
     assert_equal false, g.cyclic?
   end
 
+  def test_single_node_cyclic_graph_acyclic_and_cyclic
+    g = Graph.new
+    a = Node.new('a')
+    g.add_node(a)
+    assert_equal true, g.acyclic?
+    assert_equal false, g.cyclic?
+    a.add_edge(Edge.new(a, a))
+    assert_equal false, g.acyclic?
+    assert_equal true, g.cyclic?
+  end
+
   def test_simple_graph_acyclic_and_cyclic
     g = Graph.new
     a = Node.new('a')
