@@ -10,14 +10,15 @@ GEM
     facter (1.7.6)
     json (2.3.0)
     minitest (5.3.5)
-    minitest-color (0.0.1)
-    parallel (0.6.5)
+    minitest-color (0.0.2)
+      minitest (~> 5)
+    parallel (1.19.1)
     simplecov (0.17.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    trollop (2.0)
+    trollop (2.9.10)
 
 PLATFORMS
   ruby
@@ -26,7 +27,7 @@ DEPENDENCIES
   facter (~> 1.7.6)
   minitest (~> 5.3.3)
   minitest-color (~> 0.0.1)
-  parallel (~> 0.6.5)
+  parallel
   ryeppp!
   simplecov
   trollop (~> 2.0)
