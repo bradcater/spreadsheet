@@ -92,13 +92,6 @@ class Spreadsheet
           end
         end
       end
-      puts "@dgraph before modification"
-      @dgraph.nodes.each do |n|
-        puts n
-        n.edges.each do |e|
-          puts "#{e.from_node} -> #{e.to_node}"
-        end
-      end
       node = @dgraph.nodes.find{|n| n.name == [row, col]}
       node_existed = !!node
       node ||= Node.new([row, col])
@@ -133,13 +126,6 @@ class Spreadsheet
         #  @dgraph.remove_node(node)
         #end
       end
-      puts "@dgraph after modification"
-      @dgraph.nodes.each do |n|
-        puts n
-        n.edges.each do |e|
-          puts "#{e.from_node} -> #{e.to_node}"
-        end
-      end
       if [
         AbsCell,
         RefCell
@@ -152,7 +138,6 @@ class Spreadsheet
       end
     else
       unless @dgraph.nodes.any?{|n| n.name == [row, col]}
-        puts "adding #{[row, col]}"
         @dgraph.add_node(Node.new([row, col]))
       end
       if StaticCell.number?(value)

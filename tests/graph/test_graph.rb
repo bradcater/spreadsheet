@@ -60,6 +60,11 @@ class TestGraph < Minitest::Test
     c = Node.new('c')
     d = Node.new('d')
     e = Node.new('e')
+    g.add_node(a)
+    g.add_node(b)
+    g.add_node(c)
+    g.add_node(d)
+    g.add_node(e)
     a.add_edge(Edge.new(a, b))
     a.add_edge(Edge.new(a, c))
     b.add_edge(Edge.new(b, c))
@@ -67,11 +72,6 @@ class TestGraph < Minitest::Test
     c.add_edge(Edge.new(c, d))
     c.add_edge(Edge.new(c, e))
     e.add_edge(Edge.new(e, d))
-    g.add_node(a)
-    g.add_node(b)
-    g.add_node(c)
-    g.add_node(d)
-    g.add_node(e)
     assert_equal true, g.acyclic?
     assert_equal false, g.cyclic?
   end
@@ -89,6 +89,12 @@ class TestGraph < Minitest::Test
     d = Node.new('d')
     e = Node.new('e')
     f = Node.new('f')
+    g.add_node(a)
+    g.add_node(b)
+    g.add_node(c)
+    g.add_node(d)
+    g.add_node(e)
+    g.add_node(f)
     a.add_edge(Edge.new(a, b))
     a.add_edge(Edge.new(a, c))
     b.add_edge(Edge.new(b, c))
@@ -98,12 +104,6 @@ class TestGraph < Minitest::Test
     e.add_edge(Edge.new(e, d))
     d.add_edge(Edge.new(d, f))
     f.add_edge(Edge.new(f, e))
-    g.add_node(a)
-    g.add_node(b)
-    g.add_node(c)
-    g.add_node(d)
-    g.add_node(e)
-    g.add_node(f)
     assert_equal false, g.acyclic?
     assert_equal true, g.cyclic?
   end
