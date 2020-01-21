@@ -126,10 +126,7 @@ class Spreadsheet
         #  @dgraph.remove_node(node)
         #end
       end
-      if [
-        AbsCell,
-        RefCell
-      ].include?(klass = FormulaCell.formula_type(value))
+      if (klass = FormulaCell.formula_type(value)).ancestors.any?{|x| x == SingleDependencyFormulaCell}
         @rows[row][col] = klass.new(self, cell_indices.first)
       elsif klass
         @rows[row][col] = klass.new(self, cell_indices)
